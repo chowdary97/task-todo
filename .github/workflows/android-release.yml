@@ -22,7 +22,8 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
-        # or use npm install if you're using npm
+        # If you're using npm instead of yarn, replace with:
+        # run: npm install
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
@@ -30,11 +31,11 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
-      - name: Grant execute permission to gradlew
+      - name: Grant execute permission to Gradle wrapper
         run: chmod +x ./android/gradlew
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
+      - name: Build Release APK with full logs
+        run: ./gradlew assembleRelease --stacktrace --info --warning-mode=all
         working-directory: android
 
       - name: Upload APK
