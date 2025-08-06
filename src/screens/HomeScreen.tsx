@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -7,10 +14,20 @@ import { RootStackParamList } from '../../App';
 import { getTodos, saveTodos } from '../storage/todoStorage';
 import { Todo } from '../types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from 'react-native-google-mobile-ads';
+
+const adUnitId = __DEV__
+  ? TestIds.BANNER
+  : 'ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy'; // Replace with your real Ad Unit ID in production
 
 const HomeScreen = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -26,17 +43,19 @@ const HomeScreen = () => {
     Alert.alert('Delete Todo', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Delete', style: 'destructive', onPress: async () => {
-          const updated = todos.filter(todo => todo.id !== id);
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const updated = todos.filter((todo) => todo.id !== id);
           await saveTodos(updated);
           setTodos(updated);
-        }
-      }
+        },
+      },
     ]);
   };
 
   const toggleCompleted = async (id: string) => {
-    const updated = todos.map(todo =>
+    const updated = todos.map((todo) =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
     setTodos(updated);
@@ -51,8 +70,15 @@ const HomeScreen = () => {
         tintColors={{ true: '#22c55e', false: '#ccc' }}
         style={styles.checkbox}
       />
-      <TouchableOpacity onPress={() => navigation.navigate('AddEditTodo', { id: item.id })} style={{ flex: 1 }}>
-        <Text style={[styles.todoTitle, item.completed && styles.completed]}>{item.title}</Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('AddEditTodo', { id: item.id })}
+        style={{ flex: 1 }}
+      >
+        <Text
+          style={[styles.todoTitle, item.completed && styles.completed]}
+        >
+          {item.title}
+        </Text>
         {item.description ? (
           <Text style={styles.todoDescription}>{item.description}</Text>
         ) : null}
@@ -65,13 +91,23 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Use default header from navigation, so remove custom headerBar */}
       <FlatList
         data={todos}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ padding: 20 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 120 }}
       />
+
+      {/* ✅ AdMob Banner */}
+      <BannerAd
+        unitId={adUnitId}
+        size={BannerAdSize.ADAPTIVE_BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+        }}
+      />
+
+      {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('AddEditTodo')}
@@ -103,7 +139,6 @@ const styles = StyleSheet.create({
   completed: { textDecorationLine: 'line-through', color: '#aaa' },
   checkbox: { marginRight: 12 },
   todoDescription: { fontSize: 14, color: '#666', marginTop: 4 },
-  // removed custom headerBar and headerText styles
   fab: {
     position: 'absolute',
     right: 20,
